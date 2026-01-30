@@ -1,0 +1,51 @@
+# Heartweb - Luoluo & Gaby's Love Story
+# Edit this file to update your website content
+
+site:
+  names:
+    - Luoluo
+    - Gaby
+  subtitle: "A journey through time, love, and endless moments"
+  quote: "In all the world, there is no heart for me like yours. In all the world, there is no love for you like mine."
+
+# Timeline events - add/edit/remove as needed
+timeline:
+  - id: first-meet
+    title: "First Conversation"
+    date: "2025-12-14"
+    description: "In a world of billions, two souls found each other. It wasn't just chance—it was destiny calling."
+    photo: firstmeet.jpg
+
+  - id: first-date
+    title: "First Date"
+    date: ""
+    description: "The nervousness, the excitement, the butterflies. Everything felt just right."
+    photo: null  # Add photo filename when available
+
+  - id: first-adventure
+    title: "Our First Adventure"
+    date: ""
+    description: "Exploring the world together, hand in hand, creating memories that will last forever."
+    photo: null
+
+  - id: present
+    title: "Still Writing Our Story"
+    date: ""
+    description: "Every day is a new chapter, a new adventure, a new reason to fall in love all over again."
+    photo: null
+    isActive: true
+
+# Gallery photos - add photos here
+gallery:
+  - src: firstmeet.jpg
+    caption: "The moment we said hello"
+
+  - src: firstexposepicture1.jpg
+    caption: "Getting to know you"
+
+  - src: firstexposepicture2.jpg
+    caption: "Growing closer every day"
+
+# Add more photos like this:
+# - src: your-photo-name.jpg
+#   caption: "Description of the moment"

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luoluo ❤ Gaby - Our Love Story</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Playfair+Display:wght@400;700&family=Great+Vibes&family=Poppins:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Landing Page Hero -->
+    <section id="hero" class="hero-section">
+        <canvas id="heroCanvas"></canvas>
+        <div class="petals-container" id="heroPetalsContainer"></div>
+
+        <nav class="navbar">
+            <div class="nav-logo">L & G</div>
+            <ul class="nav-menu">
+                <li><a href="#hero">Home</a></li>
+                <li><a href="#story">Our Story</a></li>
+                <li><a href="#timeline">Timeline</a></li>
+                <li><a href="#gallery">Gallery</a></li>
+            </ul>
+        </nav>
+
+        <div class="hero-content">
+            <div class="hero-text-wrapper">
+                <h1 class="hero-title">
+                    <span class="name-lg luoluo">Luoluo</span>
+                    <span class="heart-icon-lg">❤</span>
+                    <span class="name-lg gaby">Gaby</span>
+                </h1>
+                <p class="hero-subtitle">A journey through time, love, and endless moments</p>
+                <button class="cta-btn" id="exploreBtn">
+                    Explore Our Story
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
+            <div class="scroll-indicator">
+                <span>Scroll to discover</span>
+                <div class="scroll-arrow"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Story Content -->
+    <div id="storyContent" class="story-content">
+
+        <!-- Introduction Section -->
+        <section id="story" class="intro-section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <span class="section-tag">Chapter One</span>
+                    <h2>How It All Began</h2>
+                    <p class="section-description">Every great love story has a beginning. Ours started with a
+                        serendipitous moment that changed everything.</p>
+                </div>
+                <div class="intro-content-grid">
+                    <div class="intro-text fade-in">
+                        <h3>The First Meeting</h3>
+                        <p>In a world of billions, two souls found each other. It wasn't just chance—it was destiny
+                            calling. From the first conversation, we knew something magical was beginning.</p>
+                        <p>The laughter, the shared dreams, the countless moments that made time stand still. This is
+                            where our story begins.</p>
+                    </div>
+                    <div class="intro-image-card fade-in">
+                        <div class="chat-showcase">
+                            <div class="chat-header">
+                                <span class="chat-tag">Our First Conversation</span>
+                                <p class="chat-date">December 14, 2025</p>
+                            </div>
+                            <div class="carousel-container">
+                                <div class="chat-screenshots carousel">
+                                    <div class="screenshot-item">
+                                        <img src="firstmeet.jpg" alt="First message with Harvey">
+                                        <div class="screenshot-caption">The moment we said hello</div>
+                                    </div>
+                                    <div class="screenshot-item">
+                                        <img src="firstexposepicture1.jpg" alt="Getting to know each other">
+                                        <div class="screenshot-caption">Getting to know you</div>
+                                    </div>
+                                    <div class="screenshot-item">
+                                        <img src="firstexposepicture2.jpg" alt="Our connection grows">
+                                        <div class="screenshot-caption">Growing closer every day</div>
+                                    </div>
+                                </div>
+                                <div class="carousel-dots">
+                                    <span class="dot active" data-slide="0"></span>
+                                    <span class="dot" data-slide="1"></span>
+                                    <span class="dot" data-slide="2"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Heart Section -->
+        <section class="heart-interactive-section">
+            <canvas id="heartCanvas"></canvas>
+            <div class="heart-overlay">
+                <h2 class="fade-in">Every touch tells our story</h2>
+                <p class="fade-in">Move your cursor to feel the magic</p>
+            </div>
+        </section>
+
+        <!-- Timeline Section -->
+        <section id="timeline" class="timeline-section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <span class="section-tag">Our Journey</span>
+                    <h2>Moments That Matter</h2>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">The Beginning</div>
+                            <h3>First Date</h3>
+                            <p>The nervousness, the excitement, the butterflies. Everything felt just right.</p>
+                            <div class="timeline-photo">
+                                <div class="image-placeholder">
+                                    <span>📸</span>
+                                    <p>Add a photo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">Making Memories</div>
+                            <h3>Our First Adventure</h3>
+                            <p>Exploring the world together, hand in hand, creating memories that will last forever.</p>
+                            <div class="timeline-photo">
+                                <div class="image-placeholder">
+                                    <span>📸</span>
+                                    <p>Add a photo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">Special Moment</div>
+                            <h3>A Milestone Together</h3>
+                            <p>Celebrating achievements, sharing dreams, and building our future together.</p>
+                            <div class="timeline-photo">
+                                <div class="image-placeholder">
+                                    <span>📸</span>
+                                    <p>Add a photo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item fade-in">
+                        <div class="timeline-dot active"></div>
+                        <div class="timeline-content">
+                            <div class="timeline-date">Present Day</div>
+                            <h3>Still Writing Our Story</h3>
+                            <p>Every day is a new chapter, a new adventure, a new reason to fall in love all over again.
+                            </p>
+                            <div class="timeline-photo">
+                                <div class="image-placeholder">
+                                    <span>📸</span>
+                                    <p>Add a photo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="gallery" class="gallery-section">
+            <div class="container">
+                <div class="section-header fade-in">
+                    <span class="section-tag">Captured Moments</span>
+                    <h2>Our Memory Gallery</h2>
+                    <p class="section-description">Pictures worth a thousand words, memories worth a lifetime</p>
+                </div>
+
+                <div class="gallery-grid">
+                    <div class="gallery-item fade-in">
+                        <img src="firstmeet.jpg" alt="Our first conversation">
+                        <div class="gallery-caption">First Hello</div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <div class="image-placeholder">
+                            <span>📸</span>
+                            <p>Memory 2</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <div class="image-placeholder">
+                            <span>📸</span>
+                            <p>Memory 3</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <div class="image-placeholder">
+                            <span>📸</span>
+                            <p>Memory 4</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <div class="image-placeholder">
+                            <span>📸</span>
+                            <p>Memory 5</p>
+                        </div>
+                    </div>
+                    <div class="gallery-item fade-in">
+                        <div class="image-placeholder">
+                            <span>📸</span>
+                            <p>Memory 6</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-heart">
+                <canvas id="footerHeartCanvas"></canvas>
+            </div>
+            <div class="footer-content">
+                <h3>Forever & Always</h3>
+                <p>Luoluo & Gaby</p>
+                <div class="footer-quote">
+                    "In all the world, there is no heart for me like yours. In all the world, there is no love for you
+                    like mine."
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
