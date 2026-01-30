@@ -1,0 +1,194 @@
+---
+interface Props {
+  names: string[];
+  subtitle: string;
+}
+
+const { names, subtitle } = Astro.props;
+---
+
+<section class="hero" id="hero">
+  <!-- Decorative elements -->
+  <div class="hero-decor">
+    <div class="decor-circle decor-circle-1"></div>
+    <div class="decor-circle decor-circle-2"></div>
+    <div class="decor-circle decor-circle-3"></div>
+    <div class="decor-line decor-line-1"></div>
+    <div class="decor-line decor-line-2"></div>
+  </div>
+
+  <div class="hero-content container">
+    <div class="hero-text">
+      <p class="hero-prelude fade-in">Our Love Story</p>
+      
+      <h1 class="hero-title fade-in">
+        <span class="name handwriting">{names[0]}</span>
+        <span class="heart">❤</span>
+        <span class="name handwriting">{names[1]}</span>
+      </h1>
+      
+      <p class="hero-subtitle fade-in">{subtitle}</p>
+      
+      <a href="#story" class="btn btn-primary fade-in">
+        Explore Our Story
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-hero);
+    overflow: hidden;
+  }
+
+  /* Decorative Elements */
+  .hero-decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .decor-circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.4;
+  }
+
+  .decor-circle-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, var(--color-secondary) 0%, transparent 70%);
+    top: -100px;
+    right: -100px;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .decor-circle-2 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
+    bottom: -50px;
+    left: -50px;
+    animation: float 10s ease-in-out infinite reverse;
+  }
+
+  .decor-circle-3 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, var(--color-accent) 0%, transparent 70%);
+    top: 30%;
+    left: 10%;
+    animation: float 12s ease-in-out infinite;
+  }
+
+  .decor-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, var(--color-secondary), transparent);
+    height: 1px;
+    opacity: 0.3;
+  }
+
+  .decor-line-1 {
+    width: 300px;
+    top: 20%;
+    right: 10%;
+    transform: rotate(-15deg);
+  }
+
+  .decor-line-2 {
+    width: 250px;
+    bottom: 25%;
+    left: 5%;
+    transform: rotate(10deg);
+  }
+
+  /* Hero Content */
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding-top: 80px;
+  }
+
+  .hero-text {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-prelude {
+    font-size: 1rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-primary);
+    margin-bottom: var(--space-md);
+  }
+
+  .hero-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  .name {
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: var(--color-primary);
+    line-height: 1;
+  }
+
+  .heart {
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: #E91E63;
+    animation: pulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(233, 30, 99, 0.5));
+  }
+
+  .hero-subtitle {
+    font-family: var(--font-display);
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-bottom: var(--space-lg);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn {
+    animation-delay: 0.4s;
+  }
+
+  @media (max-width: 768px) {
+    .hero-title {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .decor-circle-1 {
+      width: 250px;
+      height: 250px;
+    }
+
+    .decor-circle-2 {
+      width: 200px;
+      height: 200px;
+    }
+
+    .decor-circle-3 {
+      display: none;
+    }
+  }
+</style>

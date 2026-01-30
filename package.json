@@ -1,0 +1,29 @@
+{
+  "name": "heartweb",
+  "version": "1.0.0",
+  "description": "Luoluo & Gaby's Love Story",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lwl2333/heartweb.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lwl2333/heartweb/issues"
+  },
+  "homepage": "https://github.com/lwl2333/heartweb#readme",
+  "dependencies": {
+    "astro": "^5.17.1",
+    "js-yaml": "^4.1.1"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9"
+  }
+}

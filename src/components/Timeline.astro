@@ -1,0 +1,229 @@
+---
+interface TimelineEvent {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  photo: string | null;
+  isActive?: boolean;
+}
+
+interface Props {
+  events: TimelineEvent[];
+}
+
+const { events } = Astro.props;
+---
+
+<section class="timeline-section" id="timeline">
+  <div class="container">
+    <div class="section-header text-center fade-in">
+      <span class="section-tag">Our Journey</span>
+      <h2>Moments That Matter</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-line"></div>
+      
+      {events.map((event, index) => (
+        <div class={`timeline-item fade-in ${index % 2 === 0 ? 'left' : 'right'}`}>
+          <div class={`timeline-dot ${event.isActive ? 'active' : ''}`}></div>
+          
+          <div class="timeline-content">
+            {event.date && <span class="timeline-date">{event.date}</span>}
+            <h3>{event.title}</h3>
+            <p>{event.description}</p>
+            
+            {event.photo ? (
+              <div class="timeline-photo">
+                <img src={`/photos/${event.photo}`} alt={event.title} loading="lazy" />
+              </div>
+            ) : (
+              <div class="timeline-photo placeholder">
+                <span class="placeholder-icon">📸</span>
+                <span class="placeholder-text">Add a photo</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .timeline-section {
+    padding: var(--space-2xl) 0;
+    background: var(--bg-cream);
+  }
+
+  .section-header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-tag {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--gradient-accent);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+  }
+
+  .timeline {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+    transform: translateX(-50%);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: var(--space-xl);
+    display: flex;
+  }
+
+  .timeline-item.left {
+    justify-content: flex-start;
+    padding-right: calc(50% + 2rem);
+  }
+
+  .timeline-item.right {
+    justify-content: flex-end;
+    padding-left: calc(50% + 2rem);
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 16px;
+    height: 16px;
+    background: white;
+    border: 3px solid var(--color-primary);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    transition: all var(--transition-base);
+  }
+
+  .timeline-dot.active {
+    width: 24px;
+    height: 24px;
+    background: var(--color-primary);
+    box-shadow: 0 0 0 6px rgba(183, 110, 121, 0.2);
+  }
+
+  .timeline-content {
+    background: white;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    max-width: 400px;
+    transition: all var(--transition-base);
+  }
+
+  .timeline-content:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+  }
+
+  .timeline-item.left .timeline-content {
+    text-align: right;
+  }
+
+  .timeline-date {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    background: var(--bg-blush);
+    color: var(--color-primary);
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: var(--space-xs);
+  }
+
+  .timeline-content h3 {
+    font-size: 1.4rem;
+    margin-bottom: var(--space-xs);
+    color: var(--text-primary);
+  }
+
+  .timeline-content p {
+    font-size: 0.95rem;
+    margin-bottom: var(--space-sm);
+  }
+
+  .timeline-photo {
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: var(--space-sm);
+  }
+
+  .timeline-photo img {
+    width: 100%;
+    height: auto;
+    transition: transform var(--transition-slow);
+  }
+
+  .timeline-photo:hover img {
+    transform: scale(1.05);
+  }
+
+  .timeline-photo.placeholder {
+    background: var(--bg-warm);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px dashed var(--color-secondary);
+  }
+
+  .placeholder-icon {
+    font-size: 2rem;
+  }
+
+  .placeholder-text {
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  @media (max-width: 768px) {
+    .timeline-line {
+      left: 20px;
+    }
+
+    .timeline-item.left,
+    .timeline-item.right {
+      justify-content: flex-start;
+      padding-left: 50px;
+      padding-right: 0;
+    }
+
+    .timeline-dot {
+      left: 20px;
+    }
+
+    .timeline-item.left .timeline-content {
+      text-align: left;
+    }
+
+    .timeline-content {
+      max-width: 100%;
+    }
+  }
+</style>

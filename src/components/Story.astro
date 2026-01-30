@@ -1,0 +1,160 @@
+---
+interface Props {
+  description: string;
+}
+
+const { description } = Astro.props;
+---
+
+<section class="story" id="story">
+  <div class="container">
+    <div class="story-header text-center fade-in">
+      <span class="section-tag">Chapter One</span>
+      <h2>How It All Began</h2>
+      <p class="section-description">{description}</p>
+    </div>
+
+    <div class="story-content">
+      <div class="story-text fade-in">
+        <h3>The First Meeting</h3>
+        <p>In a world of billions, two souls found each other. It wasn't just chance—it was destiny calling. From the first conversation, we knew something magical was beginning.</p>
+        <p>The laughter, the shared dreams, the countless moments that made time stand still. This is where our story begins.</p>
+      </div>
+      
+      <div class="story-visual fade-in">
+        <div class="photo-frame">
+          <img src="/photos/firstmeet.jpg" alt="Our first conversation" loading="lazy" />
+          <div class="photo-caption">
+            <span class="caption-date">December 14, 2025</span>
+            <span class="caption-text">The moment we said hello</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .story {
+    padding: var(--space-2xl) 0;
+    background: var(--bg-warm);
+    position: relative;
+  }
+
+  .story::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-secondary), transparent);
+  }
+
+  .story-header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .section-tag {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--gradient-accent);
+    color: white;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-sm);
+  }
+
+  .story-header h2 {
+    margin-bottom: var(--space-sm);
+  }
+
+  .section-description {
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+  }
+
+  .story-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  .story-text h3 {
+    margin-bottom: var(--space-md);
+    color: var(--color-primary);
+  }
+
+  .story-text p {
+    margin-bottom: var(--space-sm);
+    font-size: 1.05rem;
+  }
+
+  .story-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Photo Frame */
+  .photo-frame {
+    position: relative;
+    background: white;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-photo);
+    transform: rotate(2deg);
+    transition: transform var(--transition-base);
+  }
+
+  .photo-frame:hover {
+    transform: rotate(0deg) scale(1.02);
+  }
+
+  .photo-frame img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius-sm);
+  }
+
+  .photo-caption {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding-top: 1rem;
+    text-align: center;
+  }
+
+  .caption-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    letter-spacing: 0.05em;
+  }
+
+  .caption-text {
+    font-family: var(--font-handwriting);
+    font-size: 1.25rem;
+    color: var(--color-primary);
+  }
+
+  @media (max-width: 768px) {
+    .story-content {
+      grid-template-columns: 1fr;
+      gap: var(--space-lg);
+    }
+
+    .story-visual {
+      order: -1;
+    }
+
+    .photo-frame {
+      transform: rotate(0deg);
+      max-width: 350px;
+      margin: 0 auto;
+    }
+  }
+</style>
