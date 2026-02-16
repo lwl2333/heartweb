@@ -26,7 +26,7 @@ const { events } = Astro.props;
       <div class="timeline-line"></div>
       
       {events.map((event, index) => (
-        <div class={`timeline-item fade-in ${index % 2 === 0 ? 'left' : 'right'}`}>
+        <div class="timeline-item fade-in" data-event-id={event.id}>
           <div class={`timeline-dot ${event.isActive ? 'active' : ''}`}></div>
           
           <div class="timeline-content">
@@ -35,33 +35,46 @@ const { events } = Astro.props;
             <p>{event.description}</p>
             
             {event.photo ? (
-              <div class="timeline-photo">
+              <div class="timeline-photo has-photo">
                 <img src={`/photos/${event.photo}`} alt={event.title} loading="lazy" />
               </div>
             ) : (
-              <div class="timeline-photo placeholder">
+              <div class="timeline-photo placeholder" data-upload-target={event.id}>
                 <span class="placeholder-icon">📸</span>
-                <span class="placeholder-text">Add a photo</span>
+                <span class="placeholder-text">Click to add a photo</span>
               </div>
             )}
           </div>
         </div>
       ))}
     </div>
+
+    <!-- Hidden file input for timeline uploads -->
+    <input type="file" id="timeline-file-input" accept="image/*" style="display:none" />
+
+    <!-- Timeline Lightbox -->
+    <div class="timeline-lightbox" id="timeline-lightbox">
+      <button class="timeline-lightbox-close" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+      <img src="" alt="Timeline photo" />
+    </div>
   </div>
 </section>
 
-<style>
+<style is:global>
   .timeline-section {
     padding: var(--space-2xl) 0;
     background: var(--bg-cream);
   }
 
-  .section-header {
+  .timeline-section .section-header {
     margin-bottom: var(--space-xl);
   }
 
-  .section-tag {
+  .timeline-section .section-tag {
     display: inline-block;
     padding: 0.5rem 1.25rem;
     background: var(--gradient-accent);
@@ -80,44 +93,52 @@ const { events } = Astro.props;
     margin: 0 auto;
   }
 
-  .timeline-line {
+  .timeline::before {
+    content: '';
     position: absolute;
     left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
     transform: translateX(-50%);
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+  }
+
+  .timeline-line {
+    display: none;
   }
 
   .timeline-item {
     position: relative;
     margin-bottom: var(--space-xl);
     display: flex;
+    justify-content: center;
   }
 
-  .timeline-item.left {
-    justify-content: flex-start;
-    padding-right: calc(50% + 2rem);
+  .timeline-item:nth-child(odd) .timeline-content {
+    margin-right: auto;
+    margin-left: 0;
+    padding-right: 3rem;
+    text-align: right;
   }
 
-  .timeline-item.right {
-    justify-content: flex-end;
-    padding-left: calc(50% + 2rem);
+  .timeline-item:nth-child(even) .timeline-content {
+    margin-left: auto;
+    margin-right: 0;
+    padding-left: 3rem;
+    text-align: left;
   }
 
   .timeline-dot {
     position: absolute;
     left: 50%;
-    top: 0;
+    transform: translateX(-50%);
     width: 16px;
     height: 16px;
     background: white;
     border: 3px solid var(--color-primary);
     border-radius: 50%;
-    transform: translateX(-50%);
     z-index: 10;
-    transition: all var(--transition-base);
+    transition: width var(--transition-base), height var(--transition-base), background-color var(--transition-base), box-shadow var(--transition-base);
   }
 
   .timeline-dot.active {
@@ -128,21 +149,17 @@ const { events } = Astro.props;
   }
 
   .timeline-content {
+    width: 45%;
     background: white;
     padding: var(--space-md);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    max-width: 400px;
-    transition: all var(--transition-base);
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
   }
 
   .timeline-content:hover {
     box-shadow: var(--shadow-md);
     transform: translateY(-4px);
-  }
-
-  .timeline-item.left .timeline-content {
-    text-align: right;
   }
 
   .timeline-date {
@@ -177,6 +194,9 @@ const { events } = Astro.props;
     width: 100%;
     height: auto;
     transition: transform var(--transition-slow);
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+    object-fit: cover;
   }
 
   .timeline-photo:hover img {
@@ -191,10 +211,24 @@ const { events } = Astro.props;
     align-items: center;
     gap: 0.5rem;
     border: 2px dashed var(--color-secondary);
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .timeline-photo.placeholder:hover {
+    border-color: var(--color-primary);
+    background: var(--bg-blush);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
   }
 
   .placeholder-icon {
     font-size: 2rem;
+    transition: transform var(--transition-base);
+  }
+
+  .timeline-photo.placeholder:hover .placeholder-icon {
+    transform: scale(1.15);
   }
 
   .placeholder-text {
@@ -202,28 +236,347 @@ const { events } = Astro.props;
     color: var(--text-light);
   }
 
+  /* Uploaded photo in timeline — replace button */
+  .timeline-photo-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .timeline-photo-actions button {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.75rem;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: none;
+  }
+
+  .timeline-btn-replace {
+    background: var(--bg-blush);
+    color: var(--color-primary);
+  }
+
+  .timeline-btn-replace:hover {
+    background: var(--color-primary);
+    color: white;
+  }
+
+  .timeline-btn-remove {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .timeline-btn-remove:hover {
+    background: #dc3545;
+    color: white;
+  }
+
+  /* Timeline Lightbox */
+  .timeline-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0, 0, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-base);
+  }
+
+  .timeline-lightbox.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .timeline-lightbox-close {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    color: white;
+    padding: 0.5rem;
+    z-index: 10;
+    opacity: 0.8;
+    transition: opacity var(--transition-fast);
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .timeline-lightbox-close:hover {
+    opacity: 1;
+  }
+
+  .timeline-lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+  }
+
   @media (max-width: 768px) {
-    .timeline-line {
+    .timeline::before {
       left: 20px;
     }
 
-    .timeline-item.left,
-    .timeline-item.right {
-      justify-content: flex-start;
-      padding-left: 50px;
-      padding-right: 0;
+    .timeline-item:nth-child(odd) .timeline-content,
+    .timeline-item:nth-child(even) .timeline-content {
+      width: 100%;
+      margin: 0;
+      text-align: left;
+      padding: 0 0 0 50px;
     }
 
     .timeline-dot {
       left: 20px;
     }
-
-    .timeline-item.left .timeline-content {
-      text-align: left;
-    }
-
-    .timeline-content {
-      max-width: 100%;
-    }
   }
 </style>
+
+<script>
+  // ==================== IndexedDB for Timeline ====================
+  const TL_DB_NAME = 'heartweb-timeline';
+  const TL_DB_VERSION = 1;
+  const TL_STORE_NAME = 'photos';
+
+  function openTimelineDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(TL_DB_NAME, TL_DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(TL_STORE_NAME)) {
+          db.createObjectStore(TL_STORE_NAME, { keyPath: 'eventId' });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  interface TimelinePhotoRecord {
+    eventId: string;
+    blob: Blob;
+    name: string;
+  }
+
+  async function tlSave(record: TimelinePhotoRecord): Promise<void> {
+    const db = await openTimelineDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(TL_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(TL_STORE_NAME);
+      const req = store.put(record); // put = upsert (replace if exists)
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function tlGet(eventId: string): Promise<TimelinePhotoRecord | undefined> {
+    const db = await openTimelineDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(TL_STORE_NAME, 'readonly');
+      const store = tx.objectStore(TL_STORE_NAME);
+      const req = store.get(eventId);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function tlDelete(eventId: string): Promise<void> {
+    const db = await openTimelineDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(TL_STORE_NAME, 'readwrite');
+      const store = tx.objectStore(TL_STORE_NAME);
+      const req = store.delete(eventId);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function tlGetAll(): Promise<TimelinePhotoRecord[]> {
+    const db = await openTimelineDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(TL_STORE_NAME, 'readonly');
+      const store = tx.objectStore(TL_STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ==================== DOM ====================
+  const timelineFileInput = document.getElementById('timeline-file-input') as HTMLInputElement;
+  let activeEventId: string | null = null;
+  // Track blob URLs for cleanup
+  const blobUrls: Map<string, string> = new Map();
+
+  // ==================== Show uploaded photo in timeline ====================
+  function showUploadedPhoto(eventId: string, blobUrl: string) {
+    const timelineItem = document.querySelector(`.timeline-item[data-event-id="${eventId}"]`);
+    if (!timelineItem) return;
+
+    const photoContainer = timelineItem.querySelector('.timeline-photo');
+    if (!photoContainer) return;
+
+    // Store blob URL for cleanup
+    const oldUrl = blobUrls.get(eventId);
+    if (oldUrl) URL.revokeObjectURL(oldUrl);
+    blobUrls.set(eventId, blobUrl);
+
+    // Replace placeholder (or existing uploaded photo) with image + actions
+    photoContainer.className = 'timeline-photo has-photo uploaded-photo';
+    photoContainer.removeAttribute('data-upload-target');
+    photoContainer.innerHTML = `
+      <img src="${blobUrl}" alt="Uploaded photo" loading="lazy" />
+      <div class="timeline-photo-actions">
+        <button class="timeline-btn-replace" data-action="replace" data-event-id="${eventId}">Replace</button>
+        <button class="timeline-btn-remove" data-action="remove" data-event-id="${eventId}">Remove</button>
+      </div>
+    `;
+
+    // Wire up action buttons
+    photoContainer.querySelector('[data-action="replace"]')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activeEventId = eventId;
+      timelineFileInput?.click();
+    });
+
+    photoContainer.querySelector('[data-action="remove"]')?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await removeTimelinePhoto(eventId);
+    });
+  }
+
+  // ==================== Remove uploaded photo ====================
+  async function removeTimelinePhoto(eventId: string) {
+    try {
+      await tlDelete(eventId);
+
+      const url = blobUrls.get(eventId);
+      if (url) {
+        URL.revokeObjectURL(url);
+        blobUrls.delete(eventId);
+      }
+
+      // Restore placeholder
+      const timelineItem = document.querySelector(`.timeline-item[data-event-id="${eventId}"]`);
+      const photoContainer = timelineItem?.querySelector('.timeline-photo');
+      if (photoContainer) {
+        photoContainer.className = 'timeline-photo placeholder';
+        photoContainer.setAttribute('data-upload-target', eventId);
+        photoContainer.innerHTML = `
+          <span class="placeholder-icon">📸</span>
+          <span class="placeholder-text">Click to add a photo</span>
+        `;
+        // Re-bind click on restored placeholder
+        photoContainer.addEventListener('click', () => {
+          activeEventId = eventId;
+          timelineFileInput?.click();
+        });
+      }
+    } catch (err) {
+      console.error('Failed to remove timeline photo:', err);
+    }
+  }
+
+  // ==================== Upload flow ====================
+  // Bind click on all placeholders
+  document.querySelectorAll('.timeline-photo.placeholder[data-upload-target]').forEach((el) => {
+    const eventId = el.getAttribute('data-upload-target');
+    if (!eventId) return;
+    el.addEventListener('click', () => {
+      activeEventId = eventId;
+      timelineFileInput?.click();
+    });
+  });
+
+  // File input change
+  timelineFileInput?.addEventListener('change', async () => {
+    if (!activeEventId || !timelineFileInput.files || timelineFileInput.files.length === 0) return;
+
+    const file = timelineFileInput.files[0];
+    const eventId = activeEventId;
+    activeEventId = null;
+    timelineFileInput.value = '';
+
+    // Validate
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      return;
+    }
+
+    try {
+      await tlSave({ eventId, blob: file, name: file.name });
+      const blobUrl = URL.createObjectURL(file);
+      showUploadedPhoto(eventId, blobUrl);
+    } catch (err) {
+      console.error('Failed to save timeline photo:', err);
+    }
+  });
+
+  // ==================== Load saved photos on init ====================
+  async function loadTimelinePhotos() {
+    try {
+      const records = await tlGetAll();
+      for (const record of records) {
+        const blobUrl = URL.createObjectURL(record.blob);
+        showUploadedPhoto(record.eventId, blobUrl);
+      }
+    } catch (err) {
+      console.error('Failed to load timeline photos:', err);
+    }
+  }
+
+  loadTimelinePhotos();
+
+  // ==================== Lightbox Logic ====================
+  const lightbox = document.getElementById('timeline-lightbox');
+  const lightboxImg = lightbox?.querySelector('img');
+  const lightboxClose = lightbox?.querySelector('.timeline-lightbox-close');
+
+  function openTimelineLightbox(src: string) {
+    if (!lightbox || !lightboxImg) return;
+    lightboxImg.src = src;
+    lightbox.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeTimelineLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Event delegation for opening lightbox
+  document.querySelector('.timeline')?.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    // Check if clicked element is an image inside a photo container
+    if (target.tagName === 'IMG' && target.closest('.timeline-photo')) {
+      const photoContainer = target.closest('.timeline-photo');
+      if (photoContainer?.classList.contains('has-photo')) {
+        const img = target as HTMLImageElement;
+        openTimelineLightbox(img.src);
+      }
+    }
+  });
+
+  // Close handlers
+  lightboxClose?.addEventListener('click', closeTimelineLightbox);
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) {
+      closeTimelineLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox?.classList.contains('active')) {
+      closeTimelineLightbox();
+    }
+  });
+</script>
