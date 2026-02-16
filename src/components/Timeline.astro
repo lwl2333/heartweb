@@ -482,6 +482,34 @@ const { events } = Astro.props;
     }
   }
 
+  // ==================== Config (same as Gallery) ====================
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
+
+  function validateTimelineFile(file: File): string | null {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return `"${file.name}" is not a supported format`;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      return `"${file.name}" exceeds 20MB image limit`;
+    }
+    return null;
+  }
+
+  // ==================== Toast (reuses Gallery's #upload-toast) ====================
+  let tlToastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function showTimelineToast(message: string) {
+    const toast = document.getElementById('upload-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    if (tlToastTimer) clearTimeout(tlToastTimer);
+    tlToastTimer = setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+
   // ==================== Upload flow ====================
   // Bind click on all placeholders
   document.querySelectorAll('.timeline-photo.placeholder[data-upload-target]').forEach((el) => {
@@ -502,12 +530,10 @@ const { events } = Astro.props;
     activeEventId = null;
     timelineFileInput.value = '';
 
-    // Validate
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      return;
-    }
-    if (file.size > 20 * 1024 * 1024) {
+    // Validate (same logic as Gallery)
+    const error = validateTimelineFile(file);
+    if (error) {
+      showTimelineToast(error);
       return;
     }
 
@@ -517,6 +543,7 @@ const { events } = Astro.props;
       showUploadedPhoto(eventId, blobUrl);
     } catch (err) {
       console.error('Failed to save timeline photo:', err);
+      showTimelineToast(`Failed to save "${file.name}"`);
     }
   });
 
