@@ -19,13 +19,31 @@ const { photos } = Astro.props;
       <p class="section-description">Pictures worth a thousand words, memories worth a lifetime</p>
     </div>
 
-    <div class="gallery-grid">
+    <!-- Upload Area -->
+    <div class="upload-area fade-in" id="upload-area">
+      <div class="upload-content">
+        <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p class="upload-title">Add Your Memories</p>
+        <p class="upload-hint">Drag & drop photos or videos here, or click to browse</p>
+        <p class="upload-formats">Supports: JPG, PNG, GIF, WebP, MP4, WebM, MOV</p>
+        <input type="file" id="file-input" multiple accept="image/*,video/*" />
+        <button class="btn btn-outline upload-btn" id="upload-btn">Choose Files</button>
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="gallery-grid" id="gallery-grid">
       {photos.map((photo, index) => (
         <div 
           class="gallery-item fade-in" 
           data-index={index}
           data-src={`/photos/${photo.src}`}
           data-caption={photo.caption}
+          data-type="image"
         >
           <img src={`/photos/${photo.src}`} alt={photo.caption} loading="lazy" />
           <div class="gallery-overlay">
@@ -41,6 +59,9 @@ const { photos } = Astro.props;
     </div>
   </div>
 </section>
+
+<!-- Toast Notification -->
+<div class="upload-toast" id="upload-toast"></div>
 
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox">
@@ -64,11 +85,19 @@ const { photos } = Astro.props;
   
   <div class="lightbox-content">
     <img class="lightbox-image" src="" alt="" />
+    <video class="lightbox-video hidden" controls playsinline></video>
     <p class="lightbox-caption"></p>
+    <button class="lightbox-delete" id="lightbox-delete" aria-label="Delete uploaded item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+      </svg>
+      <span>Delete</span>
+    </button>
   </div>
 </div>
 
-<style>
+<style is:global>
   .gallery-section {
     padding: var(--space-2xl) 0;
     background: var(--bg-blush);
@@ -96,6 +125,71 @@ const { photos } = Astro.props;
     margin: var(--space-sm) auto 0;
   }
 
+  /* ===== Upload Area ===== */
+  .upload-area {
+    border: 2px dashed var(--color-primary-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl) var(--space-md);
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    background: rgba(255, 255, 255, 0.6);
+    transition: all var(--transition-base);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .upload-area:hover,
+  .upload-area.drag-over {
+    border-color: var(--color-primary);
+    background: rgba(255, 245, 245, 0.9);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .upload-area.drag-over {
+    border-style: solid;
+  }
+
+  .upload-icon {
+    color: var(--color-primary-light);
+    margin-bottom: var(--space-sm);
+    transition: color var(--transition-base);
+  }
+
+  .upload-area:hover .upload-icon,
+  .upload-area.drag-over .upload-icon {
+    color: var(--color-primary);
+  }
+
+  .upload-title {
+    font-family: var(--font-handwriting);
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .upload-hint {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+  }
+
+  .upload-formats {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: var(--space-sm);
+  }
+
+  .upload-area input[type="file"] {
+    display: none;
+  }
+
+  .upload-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  /* ===== Gallery Grid ===== */
   .gallery-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -119,7 +213,8 @@ const { photos } = Astro.props;
     box-shadow: var(--shadow-lg);
   }
 
-  .gallery-item img {
+  .gallery-item img,
+  .gallery-item video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -127,7 +222,8 @@ const { photos } = Astro.props;
     transition: transform var(--transition-slow);
   }
 
-  .gallery-item:hover img {
+  .gallery-item:hover img,
+  .gallery-item:hover video {
     transform: scale(1.05);
   }
 
@@ -162,7 +258,58 @@ const { photos } = Astro.props;
     opacity: 0.8;
   }
 
-  /* Lightbox */
+  /* Video play badge on grid items */
+  .video-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  .video-badge svg {
+    margin-left: 2px;
+  }
+
+  /* Delete button on uploaded items */
+  .item-delete {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 28px;
+    height: 28px;
+    background: rgba(220, 53, 69, 0.85);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 6;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all var(--transition-fast);
+  }
+
+  .gallery-item:hover .item-delete {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .item-delete:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: scale(1.15) !important;
+  }
+
+  /* ===== Lightbox ===== */
   .lightbox {
     position: fixed;
     inset: 0;
@@ -235,6 +382,19 @@ const { photos } = Astro.props;
     box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
   }
 
+  .lightbox-video {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    outline: none;
+  }
+
+  .lightbox-image.hidden,
+  .lightbox-video.hidden {
+    display: none;
+  }
+
   .lightbox-caption {
     color: white;
     font-family: var(--font-handwriting);
@@ -243,10 +403,66 @@ const { photos } = Astro.props;
     text-align: center;
   }
 
+  .lightbox-delete {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: var(--space-sm);
+    padding: 0.5rem 1rem;
+    background: rgba(220, 53, 69, 0.8);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+  }
+
+  .lightbox-delete.visible {
+    display: inline-flex;
+  }
+
+  .lightbox-delete:hover {
+    background: rgba(220, 53, 69, 1);
+    transform: translateY(-1px);
+  }
+
+  /* ===== Toast ===== */
+  .upload-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text-primary);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    z-index: 3000;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .upload-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== Responsive ===== */
   @media (max-width: 768px) {
     .gallery-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: var(--space-sm);
+    }
+
+    .upload-area {
+      padding: var(--space-lg) var(--space-sm);
+    }
+
+    .upload-title {
+      font-size: 1.25rem;
     }
 
     .lightbox-nav {
@@ -274,83 +490,473 @@ const { photos } = Astro.props;
 </style>
 
 <script>
-  // Lightbox functionality
+  // ==================== IndexedDB Helpers ====================
+  const DB_NAME = 'heartweb-gallery';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'media';
+
+  function openDB(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+        }
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  interface MediaRecord {
+    id?: number;
+    blob: Blob;
+    name: string;
+    type: 'image' | 'video';
+    caption: string;
+    addedAt: number;
+  }
+
+  async function dbSave(record: MediaRecord): Promise<number> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.add(record);
+      req.onsuccess = () => resolve(req.result as number);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function dbGetAll(): Promise<MediaRecord[]> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function dbDelete(id: number): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // ==================== Config ====================
+  const MAX_IMAGE_SIZE = 20 * 1024 * 1024; // 20MB
+  const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+  const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+
+  // ==================== DOM References ====================
+  const uploadArea = document.getElementById('upload-area');
+  const fileInput = document.getElementById('file-input') as HTMLInputElement;
+  const uploadBtn = document.getElementById('upload-btn');
+  const galleryGrid = document.getElementById('gallery-grid');
+  const toastEl = document.getElementById('upload-toast');
+
   const lightbox = document.getElementById('lightbox');
   const lightboxImage = lightbox?.querySelector('.lightbox-image') as HTMLImageElement;
-  const lightboxCaption = lightbox?.querySelector('.lightbox-caption');
-  const galleryItems = document.querySelectorAll('.gallery-item');
-  
+  const lightboxVideo = lightbox?.querySelector('.lightbox-video') as HTMLVideoElement;
+  const lightboxCaption = lightbox?.querySelector('.lightbox-caption') as HTMLParagraphElement;
+  const lightboxDeleteBtn = document.getElementById('lightbox-delete');
+
+  // ==================== Media Items Array ====================
+  interface MediaItem {
+    src: string;
+    caption: string;
+    type: 'image' | 'video';
+    isUploaded: boolean;
+    dbId: number | null;
+    element: HTMLElement;
+  }
+
+  const mediaItems: MediaItem[] = [];
   let currentIndex = 0;
-  const photos: { src: string; caption: string }[] = [];
-  
-  // Collect photo data
-  galleryItems.forEach((item, index) => {
-    const src = item.getAttribute('data-src') || '';
-    const caption = item.getAttribute('data-caption') || '';
-    photos.push({ src, caption });
-    
-    item.addEventListener('click', () => {
-      openLightbox(index);
+
+  // Initialize from server-rendered items
+  document.querySelectorAll('#gallery-grid .gallery-item').forEach((item) => {
+    const el = item as HTMLElement;
+    mediaItems.push({
+      src: el.getAttribute('data-src') || '',
+      caption: el.getAttribute('data-caption') || '',
+      type: 'image',
+      isUploaded: false,
+      dbId: null,
+      element: el,
+    });
+    el.addEventListener('click', () => {
+      const idx = mediaItems.findIndex(m => m.element === el);
+      if (idx >= 0) openLightbox(idx);
     });
   });
-  
+
+  // ==================== Toast ====================
+  let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function showToast(message: string) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.remove('show');
+    }, 3000);
+  }
+
+  // ==================== File Validation ====================
+  function validateFile(file: File): string | null {
+    const isImage = ALLOWED_IMAGE_TYPES.includes(file.type);
+    const isVideo = ALLOWED_VIDEO_TYPES.includes(file.type);
+
+    if (!isImage && !isVideo) {
+      return `"${file.name}" is not a supported format`;
+    }
+    if (isImage && file.size > MAX_IMAGE_SIZE) {
+      return `"${file.name}" exceeds 20MB image limit`;
+    }
+    if (isVideo && file.size > MAX_VIDEO_SIZE) {
+      return `"${file.name}" exceeds 100MB video limit`;
+    }
+    return null;
+  }
+
+  function getMediaType(file: File): 'image' | 'video' {
+    return file.type.startsWith('video/') ? 'video' : 'image';
+  }
+
+  // ==================== Create Gallery Item DOM ====================
+  function createGalleryItem(
+    blobUrl: string,
+    caption: string,
+    type: 'image' | 'video',
+    dbId: number
+  ): HTMLElement {
+    const item = document.createElement('div');
+    item.className = 'gallery-item uploaded';
+    item.setAttribute('data-type', type);
+    item.setAttribute('data-db-id', String(dbId));
+
+    if (type === 'video') {
+      const video = document.createElement('video');
+      video.src = blobUrl;
+      video.muted = true;
+      video.preload = 'metadata';
+      video.playsInline = true;
+      item.appendChild(video);
+
+      // Play icon badge
+      const badge = document.createElement('div');
+      badge.className = 'video-badge';
+      badge.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+      item.appendChild(badge);
+    } else {
+      const img = document.createElement('img');
+      img.src = blobUrl;
+      img.alt = caption;
+      img.loading = 'lazy';
+      item.appendChild(img);
+    }
+
+    // Overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'gallery-overlay';
+    overlay.innerHTML = `
+      <span class="gallery-caption">${escapeHtml(caption)}</span>
+      <span class="gallery-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+        </svg>
+      </span>
+    `;
+    item.appendChild(overlay);
+
+    // Delete button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'item-delete';
+    deleteBtn.setAttribute('aria-label', 'Delete');
+    deleteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteUploadedItem(dbId, item);
+    });
+    item.appendChild(deleteBtn);
+
+    // Click to open lightbox
+    item.addEventListener('click', () => {
+      const idx = mediaItems.findIndex(m => m.element === item);
+      if (idx >= 0) openLightbox(idx);
+    });
+
+    return item;
+  }
+
+  function escapeHtml(str: string): string {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ==================== Upload Handler ====================
+  async function handleFiles(files: FileList | File[]) {
+    let successCount = 0;
+    const errorMessages: string[] = [];
+
+    for (const file of Array.from(files)) {
+      const error = validateFile(file);
+      if (error) {
+        errorMessages.push(error);
+        continue;
+      }
+
+      const type = getMediaType(file);
+      const caption = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+
+      try {
+        const record: MediaRecord = {
+          blob: file,
+          name: file.name,
+          type,
+          caption,
+          addedAt: Date.now(),
+        };
+        const dbId = await dbSave(record);
+        const blobUrl = URL.createObjectURL(file);
+        const element = createGalleryItem(blobUrl, caption, type, dbId);
+        galleryGrid?.appendChild(element);
+
+        mediaItems.push({
+          src: blobUrl,
+          caption,
+          type,
+          isUploaded: true,
+          dbId,
+          element,
+        });
+
+        // Animate in
+        requestAnimationFrame(() => {
+          element.classList.add('fade-in');
+          requestAnimationFrame(() => {
+            element.classList.add('visible');
+          });
+        });
+
+        successCount++;
+      } catch (err) {
+        console.error('Failed to save file:', err);
+        errorMessages.push(`Failed to save "${file.name}"`);
+      }
+    }
+
+    if (successCount > 0) {
+      showToast(`Added ${successCount} memor${successCount === 1 ? 'y' : 'ies'} to your gallery`);
+    }
+    if (errorMessages.length > 0) {
+      setTimeout(() => showToast(errorMessages[0]), successCount > 0 ? 3200 : 0);
+    }
+  }
+
+  // ==================== Delete Handler ====================
+  async function deleteUploadedItem(dbId: number, element: HTMLElement) {
+    try {
+      await dbDelete(dbId);
+
+      // Remove from mediaItems array
+      const idx = mediaItems.findIndex(m => m.dbId === dbId);
+      if (idx >= 0) {
+        const item = mediaItems[idx];
+        if (item.src.startsWith('blob:')) {
+          URL.revokeObjectURL(item.src);
+        }
+        mediaItems.splice(idx, 1);
+      }
+
+      // Animate out, then remove
+      element.style.transform = 'scale(0.8)';
+      element.style.opacity = '0';
+      setTimeout(() => element.remove(), 300);
+
+      // Close lightbox if open on this item
+      if (lightbox?.classList.contains('active')) {
+        closeLightbox();
+      }
+
+      showToast('Memory removed');
+    } catch (err) {
+      console.error('Failed to delete:', err);
+      showToast('Failed to delete this memory');
+    }
+  }
+
+  // ==================== Lightbox ====================
   function openLightbox(index: number) {
     currentIndex = index;
     updateLightbox();
     lightbox?.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
-  
+
   function closeLightbox() {
     lightbox?.classList.remove('active');
     document.body.style.overflow = '';
-  }
-  
-  function updateLightbox() {
-    const photo = photos[currentIndex];
-    if (lightboxImage && lightboxCaption) {
-      lightboxImage.src = photo.src;
-      lightboxImage.alt = photo.caption;
-      lightboxCaption.textContent = photo.caption;
+    // Pause video if playing
+    if (lightboxVideo) {
+      lightboxVideo.pause();
+      lightboxVideo.src = '';
     }
   }
-  
-  function nextPhoto() {
-    currentIndex = (currentIndex + 1) % photos.length;
+
+  function updateLightbox() {
+    if (!lightboxImage || !lightboxVideo || !lightboxCaption || !lightboxDeleteBtn) return;
+
+    const item = mediaItems[currentIndex];
+    if (!item) return;
+
+    if (item.type === 'video') {
+      lightboxImage.classList.add('hidden');
+      lightboxVideo.classList.remove('hidden');
+      lightboxVideo.src = item.src;
+      lightboxVideo.load();
+    } else {
+      lightboxVideo.pause();
+      lightboxVideo.classList.add('hidden');
+      lightboxImage.classList.remove('hidden');
+      lightboxImage.src = item.src;
+      lightboxImage.alt = item.caption;
+    }
+
+    lightboxCaption.textContent = item.caption;
+
+    // Show delete button only for uploaded items
+    if (item.isUploaded) {
+      lightboxDeleteBtn.classList.add('visible');
+    } else {
+      lightboxDeleteBtn.classList.remove('visible');
+    }
+  }
+
+  function nextItem() {
+    if (mediaItems.length === 0) return;
+    if (lightboxVideo) lightboxVideo.pause();
+    currentIndex = (currentIndex + 1) % mediaItems.length;
     updateLightbox();
   }
-  
-  function prevPhoto() {
-    currentIndex = (currentIndex - 1 + photos.length) % photos.length;
+
+  function prevItem() {
+    if (mediaItems.length === 0) return;
+    if (lightboxVideo) lightboxVideo.pause();
+    currentIndex = (currentIndex - 1 + mediaItems.length) % mediaItems.length;
     updateLightbox();
   }
-  
-  // Event listeners
-  lightbox?.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
-  lightbox?.querySelector('.lightbox-next')?.addEventListener('click', nextPhoto);
-  lightbox?.querySelector('.lightbox-prev')?.addEventListener('click', prevPhoto);
-  
-  // Close on backdrop click
-  lightbox?.addEventListener('click', (e) => {
-    if (e.target === lightbox) {
-      closeLightbox();
+
+  // ==================== Event Listeners ====================
+
+  // Upload button -> trigger file input
+  uploadBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput?.click();
+  });
+
+  // Clicking upload area also triggers file input
+  uploadArea?.addEventListener('click', (e) => {
+    if (e.target === uploadBtn) return;
+    fileInput?.click();
+  });
+
+  // File input change
+  fileInput?.addEventListener('change', () => {
+    if (fileInput.files && fileInput.files.length > 0) {
+      handleFiles(fileInput.files);
+      fileInput.value = '';
     }
   });
-  
+
+  // Drag & drop
+  uploadArea?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('drag-over');
+  });
+
+  uploadArea?.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('drag-over');
+  });
+
+  uploadArea?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('drag-over');
+    const files = (e as DragEvent).dataTransfer?.files;
+    if (files && files.length > 0) {
+      handleFiles(files);
+    }
+  });
+
+  // Lightbox controls
+  lightbox?.querySelector('.lightbox-close')?.addEventListener('click', closeLightbox);
+  lightbox?.querySelector('.lightbox-next')?.addEventListener('click', nextItem);
+  lightbox?.querySelector('.lightbox-prev')?.addEventListener('click', prevItem);
+
+  lightbox?.addEventListener('click', (e) => {
+    if (e.target === lightbox) closeLightbox();
+  });
+
+  // Lightbox delete button
+  lightboxDeleteBtn?.addEventListener('click', () => {
+    const item = mediaItems[currentIndex];
+    if (item && item.isUploaded && item.dbId !== null) {
+      deleteUploadedItem(item.dbId, item.element);
+    }
+  });
+
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
     if (!lightbox?.classList.contains('active')) return;
-    
     switch (e.key) {
       case 'Escape':
         closeLightbox();
         break;
       case 'ArrowRight':
-        nextPhoto();
+        nextItem();
         break;
       case 'ArrowLeft':
-        prevPhoto();
+        prevItem();
         break;
     }
   });
+
+  // ==================== Load Saved Items on Init ====================
+  async function loadSavedMedia() {
+    try {
+      const records = await dbGetAll();
+      for (const record of records) {
+        const blobUrl = URL.createObjectURL(record.blob);
+        const element = createGalleryItem(blobUrl, record.caption, record.type, record.id!);
+        galleryGrid?.appendChild(element);
+
+        mediaItems.push({
+          src: blobUrl,
+          caption: record.caption,
+          type: record.type,
+          isUploaded: true,
+          dbId: record.id!,
+          element,
+        });
+
+        element.classList.add('fade-in', 'visible');
+      }
+    } catch (err) {
+      console.error('Failed to load saved media:', err);
+    }
+  }
+
+  loadSavedMedia();
 </script>
